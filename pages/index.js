@@ -20,6 +20,7 @@ export async function getStaticProps() {
     id: meetup._id.toString(),
     title: meetup.title,
     address: meetup.address,
+    image: meetup.image,
     description: meetup.description,
   }));
 
@@ -27,6 +28,7 @@ export async function getStaticProps() {
     props: {
       meetup: formattedMeetups,
     },
+    revalidate: 10,
   };
 }
 
