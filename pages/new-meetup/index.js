@@ -1,8 +1,23 @@
 import NewMeetupForm from "../../components/meetups/NewMeetupForm";
 
 const AddMeetupPage = () => {
-  const handleAddMeetup = (newMeetup) => {
-    console.log(newMeetup);
+  const handleAddMeetup = async (newMeetup) => {
+    try {
+      const response = await fetch("/api/new-meetup", {
+        method: "POST",
+        body: JSON.stringify(newMeetup),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Erorr while adding");
+      }
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
   return <NewMeetupForm onAddMeetup={handleAddMeetup} />;
 };
