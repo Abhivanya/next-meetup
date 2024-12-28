@@ -1,8 +1,17 @@
 import MeetupDetail from "../../components/meetups/MeetupDetail";
 import { MongoClient, ObjectId } from "mongodb";
+import Head from "next/head";
 
 const MeetupDetails = (props) => {
-  return <MeetupDetail meetupData={props.meetupData} />;
+  return (
+    <>
+      <Head>
+        <title>{props.meetupData.title}</title>
+        <meta name="description" content={props.meetupData.description} />
+      </Head>
+      <MeetupDetail meetupData={props.meetupData} />
+    </>
+  );
 };
 
 export async function getStaticPaths() {
@@ -13,14 +22,12 @@ export async function getStaticPaths() {
   const db = client.db();
   const meetupsCollection = db.collection("meetups");
 
-  const meetupsId = await meetupsCollection
-    .find({}, { projection: { _id: 1 } })
-    .toArray();
+  const meetupsId = await meetupsCollection.find({}, { _id: 1 }).toArray();
 
   client.close();
 
   return {
-    fallback: "blocking",
+    fallback: false,
     paths: meetupsId.map((meetup) => ({
       params: {
         meetupId: meetup._id.toString(),
@@ -39,16 +46,11 @@ export async function getStaticProps(context) {
   const meetupsCollection = db.collection("meetups");
 
   const meetupData = await meetupsCollection.findOne({
-    _id: ObjectId(meetupId),
+    _id: new ObjectId(meetupId),
   });
 
+  console.log(meetupData);
   client.close();
-
-  if (!meetupData) {
-    return {
-      notFound: true,
-    };
-  }
 
   return {
     props: {
