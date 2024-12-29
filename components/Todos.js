@@ -60,6 +60,7 @@ const Todos = ({
         handleUpdate={handleUpdate}
         handleDelete={handleDelete}
         handleComplete={handleComplete}
+        isComplete={false}
       />
     </div>
   );

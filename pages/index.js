@@ -42,6 +42,7 @@ const HomePage = (props) => {
   };
 
   const updateTodo = async (todoId, updatedTodo) => {
+    return;
     try {
       const response = await fetch(`/api/update-todo/${todoId}`, {
         method: "PATCH",
@@ -74,6 +75,20 @@ const HomePage = (props) => {
       console.error("Error deleting todo:", error);
     }
   };
+  const markDone = async (todoId) => {
+    try {
+      const response = await fetch(`/api/mark-complete/${todoId}`, {
+        method: "PATCH",
+      });
+      const res = await response.json();
+      if (res) {
+        alert("Todo Completed successfully");
+        setRefetch(true);
+      }
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  };
 
   return (
     <>
@@ -82,6 +97,7 @@ const HomePage = (props) => {
         handleAdd={addTodo}
         handleUpdate={updateTodo}
         handleDelete={deleteTodo}
+        handleComplete={markDone}
       />
     </>
   );
