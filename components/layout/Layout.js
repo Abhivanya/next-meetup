@@ -1,13 +1,13 @@
-import MainNavigation from './MainNavigation';
-import classes from './Layout.module.css';
+import React from "react";
+import Header from "./Header";
 
-function Layout(props) {
+const Layout = ({ children }) => {
   return (
-    <div>
-      <MainNavigation />
-      <main className={classes.main}>{props.children}</main>
-    </div>
+    <>
+      <Header />
+      {children}
+    </>
   );
-}
+};
 
 export default Layout;

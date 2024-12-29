@@ -1,43 +1,113 @@
-import MeetupList from "../components/meetups/MeetupList";
+import { useEffect, useState } from "react";
+import Todos from "../components/Todos";
 import { MongoClient } from "mongodb";
-import Head from "next/head";
 
 const HomePage = (props) => {
+  const [todos, setTodos] = useState(props.todos);
+  const [refetch, setRefetch] = useState(false);
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const response = await fetch("/api/get-todos");
+        const data = await response.json();
+        setTodos(data);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+      }
+    };
+
+    if (refetch) {
+      fetchTodos();
+      setRefetch(false);
+    }
+  }, [refetch]);
+  const addTodo = async (todo) => {
+    try {
+      const response = await fetch("/api/add-todo", {
+        method: "POST",
+        body: JSON.stringify(todo),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const res = await response.json();
+      if (res) {
+        alert("Todo added successfully");
+        setRefetch(true);
+      }
+    } catch (error) {
+      console.error("Error adding todo:", error);
+    }
+  };
+
+  const updateTodo = async (todoId, updatedTodo) => {
+    try {
+      const response = await fetch(`/api/update-todo/${todoId}`, {
+        method: "PATCH",
+        body: JSON.stringify(updatedTodo),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const res = await response.json();
+      if (res) {
+        alert("Todo updated successfully");
+        setRefetch(true);
+      }
+    } catch (error) {
+      console.error("Error updating todo:", error);
+    }
+  };
+
+  const deleteTodo = async (todoId) => {
+    try {
+      const response = await fetch(`/api/delete-todo/${todoId}`, {
+        method: "DELETE",
+      });
+      const res = await response.json();
+      if (res) {
+        alert("Todo deleted successfully");
+        setRefetch(true);
+      }
+    } catch (error) {
+      console.error("Error deleting todo:", error);
+    }
+  };
+
   return (
     <>
-      <Head>
-        <title>Meetup App</title>
-        <meta name="description" content="Find or create a Meetups " />
-      </Head>
-      <MeetupList meetups={props.meetup} />
+      <Todos
+        todos={todos}
+        handleAdd={addTodo}
+        handleUpdate={updateTodo}
+        handleDelete={deleteTodo}
+      />
     </>
   );
 };
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const client = await MongoClient.connect(
-    "mongodb+srv://abhicodeworld:abhicodeworld@cluster0.mnr2x.mongodb.net/?retryWrites=true&w=majority&appName=meetups"
+    "mongodb+srv://abhicodeworld:abhicodeworld@cluster0.dumr2.mongodb.net/next-todo?retryWrites=true&w=majority"
   );
   const db = client.db();
-  const meetupsCollection = db.collection("meetups");
+  const todosCollection = db.collection("todos");
 
-  const meetups = await meetupsCollection.find().toArray();
+  const todos = await todosCollection.find().toArray();
 
-  client.close();
+  await client.close();
 
-  const formattedMeetups = meetups.map((meetup) => ({
-    id: meetup._id.toString(),
-    title: meetup.title,
-    address: meetup.address,
-    image: meetup.image,
-    description: meetup.description,
+  const formattedTodos = todos.map((todo) => ({
+    id: todo._id.toString(),
+    title: todo.title,
+    status: todo.status,
   }));
 
   return {
     props: {
-      meetup: formattedMeetups,
+      todos: formattedTodos,
     },
-    revalidate: 10,
   };
 }
 
